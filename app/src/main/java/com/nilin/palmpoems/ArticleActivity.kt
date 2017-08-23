@@ -12,7 +12,7 @@ class ArticleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_article)
         val catalog=intent.getIntExtra("catalog",0)
-        var txt: InputStream = resources.assets.open("sanguoyanyi$catalog.txt")
+        var txt: InputStream = resources.assets.open("sc_000.txt")
         val size = txt.available()
         val buffer = ByteArray(size)
         //  把内存从inputstream内读取到数组上
