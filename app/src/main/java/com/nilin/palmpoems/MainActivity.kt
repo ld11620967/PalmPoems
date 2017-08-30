@@ -4,8 +4,15 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserFactory
+import java.io.InputStreamReader
+import java.io.StringReader
+import java.io.BufferedReader
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,14 +23,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initCatalog()
+        val lrc = getFromAssets("index.xml")
+        Log.i("1111111", lrc)
+        parseXMLWithPull(lrc)
+//        initCatalog()
 
         val layoutManager = LinearLayoutManager(this)
         rv.layoutManager = layoutManager
         val catalogadaapter = ArticleAdapter(catalogList)
-//        rv.addItemDecoration(CalalogItemDecoration(this, LinearLayoutManager.HORIZONTAL))
-//        rv.addItemDecoration(CalalogItemDecoration(
-//                this, LinearLayoutManager.VERTICAL, R.drawable.divider_mileage))
         rv.addItemDecoration(CalalogItemDecoration(
                 this, LinearLayoutManager.HORIZONTAL, 2, resources.getColor(R.color.colorAccent)))
 
@@ -37,6 +44,66 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun parseXMLWithPull(xmlData: String) {
+        try {
+            val factory = XmlPullParserFactory.newInstance()
+            val xmlPullParser = factory.newPullParser()
+            xmlPullParser.setInput(StringReader(xmlData))
+            var eventType = xmlPullParser.eventType
+            var item = ""
+            var name1 = ""
+            var version = ""
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                val nodeName = xmlPullParser.name
+                when (eventType) {
+                // 开始解析某个结点
+                    XmlPullParser.START_TAG -> {
+                        if ("item" == nodeName) {
+                            item = xmlPullParser.nextText()
+                        } else if ("name1" == nodeName) {
+                            name1 = xmlPullParser.nextText()
+                        }
+//                        else if ("version" == nodeName) {
+//                            version = xmlPullParser.nextText()
+//                        }
+                    }
+                // 完成解析某个结点
+                    XmlPullParser.END_TAG -> {
+                        if ("app" == nodeName) {
+                            Log.d("MainActivity", "id is " + item)
+                            Log.d("MainActivity", "name is " + name1)
+//                            Log.d("MainActivity", "version is " + version)
+                        }
+                    }
+                    else -> {
+                    }
+                }
+                eventType = xmlPullParser.next()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
+
+    fun getFromAssets(fileName: String): String {
+        try {
+            val inputReader = InputStreamReader(resources.assets.open(fileName))
+            val bufReader = BufferedReader(inputReader)
+
+            var Result = ""
+            bufReader.forEachLine {
+                Result = Result + it + "\r\n"
+            }
+            return Result
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
+    }
+
 
     fun initCatalog() {
         catalogList.add("宴桃园豪杰三结义\n斩黄巾英雄首立功")
